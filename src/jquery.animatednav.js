@@ -15,13 +15,17 @@
 	 * element: this element of event listener context.
  	 *
  	**/
-	var animateOut = function( element ){
+	var animateOut = function( element, $containerElem ){
 		
 		// get List items of subMenu
 		var $elems = $( element ).find(".dropdown-menu li");
+
 		
 		// add animate.css Classes to List Items of Main Menu
-		var $main = $( "ul.navbar-nav>li" ).addClass( "animated fadeOut" );
+		//var $main = $( "ul.navbar-nav>li" ).addClass( "animated fadeOut" );
+
+		var $mainList = $containerElem.find( "ul.navbar-nav>li" );
+		$mainList.addClass( "animated fadeOut" );
 
 		// Remove any trace of previous animations
 		$elems.removeClass( "animated fadeOutLeft" ); //***
@@ -41,17 +45,18 @@
 		}); //-END $elems.each()
 
 		setTimeout( function(){
-				$( "ul.navbar-nav>li" ).removeClass( "animated fadeOut" );				
+				$mainList.removeClass( "animated fadeOut" );				
 		}, 500 );
 
 	}; //- END function animateOut()
 
 	// animate the main menu back in from a submenu.
-	var animateIn = function( element ){
+	var animateIn = function( element, $containerElem ){
 
 		$( element ).data( 'closing', true ); 
 
-		$dropdownEle = $( 'ul.nav li.open' );
+		// $dropdownEle = $( 'ul.nav li.open' );
+		$dropdownEle = getOpenDropdown( $containerElem );
 
 		var $elems = $( element ).find( ".dropdown-menu li" );
 
@@ -70,13 +75,15 @@
 		}); //-END $elems.each()
 
 		
-		
+		var $mainList = $containerElem.find( "ul.navbar-nav>li" );
+
 		setTimeout( function(){
 //			jQuery( "ul.navbar-nav>li" ).removeClass( "animated fadeIn" );
-			$main = $( "ul.navbar-nav>li" ).addClass( "animated fadeIn" );
+			$mainList.addClass( "animated fadeIn" );
 			//console.log( "Fade In" );
 
-			var $toggleElem = $( 'ul.nav li.open>[data-toggle="dropdown"]' );				
+			// var $toggleElem = $( 'ul.nav li.open>[data-toggle="dropdown"]' );				
+			var $toggleElem = $containerElem.find( 'ul.nav li.open>[data-toggle="dropdown"]' );				
 			
 			$dropdownEle.data( 'closable', true );
 			
@@ -88,7 +95,7 @@
 		}, $elems.length * 200 );
 
 		setTimeout( function(){
-				$( "ul.navbar-nav>li" ).removeClass( "animated fadeIn" );
+				$mainList.removeClass( "animated fadeIn" );
 				
 		}, $elems.length * 500 );
 
@@ -96,6 +103,12 @@
 		//jQuery( element ).data( 'closing', false ); 
 
 	}; // - END function animateIn()
+
+	var getOpenDropdown = function( $containerElem ){
+		
+		return  $containerElem.find( "ul.nav li.open" ) ;
+
+	} //- END function getOpenDropdown()
 
 
 	/******************************/
@@ -106,16 +119,18 @@
 
     $.fn.animatedNav = function( options ) {
  
+
+ 		// store defaults overridden by options in 
+		// settings variable which lives in plugin scope.
+		// useable as "settings.color"
+		settings = $.extend({}, $.fn.animatedNav.defaults, options );
+
  		// just to avoid confusion with "this" context
  		var $containerElem = $( this );
 
        
         var $toggles = $containerElem.find( "ul.nav li.dropdown .dropdown-toggle" );
 
-		// store defaults overridden by options in 
-		// settings variable which lives in plugin scope.
-		// useable as "settings.color"
-		settings = $.extend({}, $.fn.animatedNav.defaults, options );
  
 		// // array of Dropdown List Items
 		// var navArray = [];
@@ -127,7 +142,7 @@
 
 
 		// Click function on dropdown-toggle anchors to create breadcrumbs.
-		$( "ul.nav li.dropdown .dropdown-toggle" ).click( function(){
+		$toggles.click( function(){
 
 			//var linkText = $( this ).find(".dropdown-toggle").text();
 			var linkText = $( this ).text();
@@ -140,22 +155,41 @@
 
 		}); // End click ul.nav li.dropdown .dropdown-toggle
 
-		// Breadcrumb click handler.
-		// Show/hide the needed menu based on bredcrumb clicks.
-		$( '#breadcrumbContainer' ).on( 'click', 'a.toggle-menu', function( e ){
+		
 
-			e.preventDefault();
-			$ele = $( this );
-			$ele.nextAll().remove();
+		if( settings.breadcrumb === true ) {
 
-			$( 'ul.nav li.open' ).data( 'breadClick', true );
+			var $breadCrumb = $containerElem.find( '#breadcrumbContainer'  );
+		
+			// Breadcrumb click handler.
+			// Show/hide the needed menu based on bredcrumb clicks.
+			$breadCrumb.on( 'click', 'a.toggle-menu', function( e ){
 
-		}); // - END #breadcrumbContainer on "click" function
+				e.preventDefault();
+
+				$ele = $( this );
+				$ele.nextAll().remove();
+
+				//$( 'ul.nav li.open' ).data( 'breadClick', true );
+
+				//$openDropdown1 = $containerElem.find( "ul.nav li.open" );
+				//$openDropdown.data( 'breadClick', true );
+
+				$openDropdown = getOpenDropdown( $containerElem );
+				$openDropdown.data( 'breadClick', true );
+
+				console.log( $openDropdown );
+				//console.log( $openDropdown1 );
+
+			}); // - END #breadcrumbContainer on "click" function
+
+		}
 
 
+		var $dropdowns = $containerElem.find( 'ul.nav .dropdown' );
 		// Bootstrap navigation dropdown event handlers
 
-		$( 'ul.nav .dropdown' ).on( {
+		$dropdowns.on( {
 
 			"hide.bs.dropdown" : function(e) { 
 				
@@ -165,18 +199,21 @@
 
 				console.log( "closable: " + $( this ).data( 'closable' ) + " | closing: " +  $( this ).data( 'closing') );
 
-				if( settings.breadcrumb === true && $( 'ul.nav li.open' ).data( 'breadClick' ) !== true) {
+				console.log( getOpenDropdown( $containerElem ) );
+				console.log( getOpenDropdown( $containerElem ).data( 'breadClick' ) );
+				//if( settings.breadcrumb === true && $( 'ul.nav li.open' ).data( 'breadClick' ) !== true) {
+				if( settings.breadcrumb === true && getOpenDropdown( $containerElem ).data( 'breadClick' ) !== true) {
 					bcCheck = false;
 				}
 				//console.log( "Getting Closing: " + jQuery( this ).data( 'closing') );	
 
 				if( $( this ).data( 'closing') !== true && bcCheck ){
 					console.log( "animateIn Called" );
-					animateIn( this );
+					animateIn( this, $containerElem );
 				}
 				
 				
-				$( 'ul.nav li.open' ).data( 'breadClick', false );
+				getOpenDropdown( $containerElem ).data( 'breadClick', false );
 				// prevent hidding of the dropdown window when closable = false
 				return jQuery( this ).data( 'closable' ); 
 
@@ -188,14 +225,17 @@
 			"show.bs.dropdown": function() { 
 				console.log( "show.bs.dropdown" );
 
-				animateOut( this );
+				animateOut( this, $containerElem );
+				$( this ).data( 'closable', false ); 
 			},
 			"shown.bs.dropdown": function() { 
 
 				console.log( "shown.bs.dropdown" );
 
 				// Initalize closable to false when the dropdown is shown
-				$( this ).data( 'closable', false ); 
+				//$( this ).data( 'closable', false ); 
+				// moved to show.bs.dropdown so the whole shown.bs.dropdown
+				// can be removed hopefully.
 		
 			}
 		});
