@@ -13,18 +13,18 @@
  	 *
 	 * Called by show.bs.dropdown event listener
 	 * element: this element of event listener context.
+	 * $containerElem: context for plugin
  	 *
  	**/
 	var animateOut = function( element, $containerElem ){
 		
-		// get List items of subMenu
+		// get List items of subMenu List Items
 		var $elems = $( element ).find(".dropdown-menu li");
 
-		
-		// add animate.css Classes to List Items of Main Menu
-		//var $main = $( "ul.navbar-nav>li" ).addClass( "animated fadeOut" );
-
+		// get list of top level List Items
 		var $mainList = $containerElem.find( "ul.navbar-nav>li" );
+
+		// add animate.css Classes to List Items of Main Menu		
 		$mainList.addClass( "animated fadeOut" );
 
 		// Remove any trace of previous animations
@@ -39,9 +39,9 @@
 			// addClass ot subMenu LI with Delay
 			setTimeout( function(){
 				//$curEle.removeClass( "fadeOutLeft" ); //***
-				$curEle.addClass( "animated fadeInLeft" );
-				//console.log( this );
-			}, 100 * i );
+				$curEle.addClass( "animated fadeInLeft" );				
+			}, settings.stagger * i );
+
 		}); //-END $elems.each()
 
 		setTimeout( function(){
@@ -50,65 +50,90 @@
 
 	}; //- END function animateOut()
 
-	// animate the main menu back in from a submenu.
+	/**
+	 * function animateIn()
+  	 * private function for plugin.
+ 	 * Animates the SubMenu Out and the Main Menu In
+ 	 *
+	 * Called by hide.bs.dropdown event listener
+	 * element: this element of event listener context.
+	 * $containerElem: context for plugin
+	**/
 	var animateIn = function( element, $containerElem ){
 
-		$( element ).data( 'closing', true ); 
+		// Get list of menu items that are a dropdown.
+		var $dropdownEle = getOpenDropdown( $containerElem );
 
-		// $dropdownEle = $( 'ul.nav li.open' );
-		$dropdownEle = getOpenDropdown( $containerElem );
-
+		// get list items of dropdown menu to be animated
 		var $elems = $( element ).find( ".dropdown-menu li" );
 
-		//$elems.removeClass( "fadeInLeft" );
+		// get top level menu list items.
+		var $mainList = $containerElem.find( "ul.navbar-nav>li" );
 
+		// signal closing of dropdown to prevent to hold off
+		// bootstraps toggle
+		$( element ).data( 'closing', true ); 
+
+		// Remove any trace of previous animations
 		$elems.removeClass( "fadeInLeft" ); //***
 
+		// Loop  subMenu Elements
+		// Attaches animation classes with increasing delay 
+		// to stagger element animations.
 		$elems.each( function( i, curElement ) {
 			var $curEle = $( curElement );
 			
-			//$curEle.removeClass( "fadeInLeft" );
 			setTimeout( function(){
 				$curEle.addClass( "animated fadeOutLeft" );
-			}, 100 * i );
+			}, settings.stagger * i );
 
 		}); //-END $elems.each()
-
 		
-		var $mainList = $containerElem.find( "ul.navbar-nav>li" );
-
+		// Animate Main menu back in
+		// allow time for submenu elements to finish animation.
 		setTimeout( function(){
-//			jQuery( "ul.navbar-nav>li" ).removeClass( "animated fadeIn" );
-			$mainList.addClass( "animated fadeIn" );
-			//console.log( "Fade In" );
+			
+			
 
-			// var $toggleElem = $( 'ul.nav li.open>[data-toggle="dropdown"]' );				
-			var $toggleElem = $containerElem.find( 'ul.nav li.open>[data-toggle="dropdown"]' );				
+
+			$mainList.addClass( "animated fadeIn" );						
 			
 			$dropdownEle.data( 'closable', true );
 			
-
+			// Get element to Toggle
+			var $toggleElem = $containerElem.find( 'ul.nav li.open>[data-toggle="dropdown"]' );	
+			
+			// trigger toggle on bootstrap dropdown element
+			// this cleans up bootstraps element state.
 			$toggleElem.dropdown( 'toggle' );
 
+			// Signal that the element has been closed.
 			$( element ).data( 'closing', false );
 
 		}, $elems.length * 200 );
 
+		// clean up main LI animation classes.
 		setTimeout( function(){
 				$mainList.removeClass( "animated fadeIn" );
 				
 		}, $elems.length * 500 );
 
-		// Signal that closing is now done.
-		//jQuery( element ).data( 'closing', false ); 
-
 	}; // - END function animateIn()
 
+	/**
+	 * function getOpenDropdown
+	 * private function
+	 * returns the dropdown list item which
+	 * holds the .open class.
+	 * keeps element in context
+	 * $containerElem: element of plugin context.
+	 *
+	**/
 	var getOpenDropdown = function( $containerElem ){
 		
 		return  $containerElem.find( "ul.nav li.open" ) ;
 
-	} //- END function getOpenDropdown()
+	}; //- END function getOpenDropdown()
 
 
 	/******************************/
@@ -125,132 +150,124 @@
 		// useable as "settings.color"
 		settings = $.extend({}, $.fn.animatedNav.defaults, options );
 
- 		// just to avoid confusion with "this" context
+ 		// avoid confusion with "this" context
  		var $containerElem = $( this );
 
-       
+       // Get all the dropdown toggle elements.
         var $toggles = $containerElem.find( "ul.nav li.dropdown .dropdown-toggle" );
 
- 
-		// // array of Dropdown List Items
-		// var navArray = [];
-
-		// // populating array of drop downs from Anchor tag text
-		// $( 'ul.nav li .dropdown-toggle' ).each( function() {
-		// 	navArray.push( $( this ).text() );
-		// });
-
-
-		// Click function on dropdown-toggle anchors to create breadcrumbs.
-		$toggles.click( function(){
-
-			//var linkText = $( this ).find(".dropdown-toggle").text();
-			var linkText = $( this ).text();
-			//console.log( linkText );
-			//.....//
-			// add code to insert new breadcrumb //
-			var breadcrumbContainer = $( '#breadcrumbContainer' );
-
-			breadcrumbContainer.append( "<a>" + linkText + "</a>" );
-
-		}); // End click ul.nav li.dropdown .dropdown-toggle
-
 		
-
+		// breadcrumb functionality
+		// ignored if settings.breadcrumb is set to false
 		if( settings.breadcrumb === true ) {
 
+			// get breadcrumb container element.
 			var $breadCrumb = $containerElem.find( '#breadcrumbContainer'  );
+
+			//listen to dropdown-toggle anchors to create breadcrumbs.
+			$toggles.click( function(){
+
+				// get text of link to use in breadcrumb
+				var linkText = $( this ).text();
+				
+				// Append breadcrumb link
+				$breadCrumb.append( "<a>" + linkText + "</a>" );
+
+			}); // End click ul.nav li.dropdown .dropdown-toggle
+
+			
 		
 			// Breadcrumb click handler.
 			// Show/hide the needed menu based on bredcrumb clicks.
 			$breadCrumb.on( 'click', 'a.toggle-menu', function( e ){
 
-				e.preventDefault();
+				e.preventDefault(); 
 
+				// remove all breadcrumbs following the item clicked.
 				$ele = $( this );
 				$ele.nextAll().remove();
 
-				//$( 'ul.nav li.open' ).data( 'breadClick', true );
-
-				//$openDropdown1 = $containerElem.find( "ul.nav li.open" );
-				//$openDropdown.data( 'breadClick', true );
-
+				// signal that a breadcrumb has been clicked 
+				// this allows the animateIn function call to happen.
 				$openDropdown = getOpenDropdown( $containerElem );
 				$openDropdown.data( 'breadClick', true );
 
-				console.log( $openDropdown );
-				//console.log( $openDropdown1 );
 
 			}); // - END #breadcrumbContainer on "click" function
 
-		}
+		} //- END if( settings.breadcrumbs === true )
 
 
-		var $dropdowns = $containerElem.find( 'ul.nav .dropdown' );
+
+        // Get list items that are twbs dropdown elements.
+        var $dropdowns = $containerElem.find( 'ul.nav .dropdown' );
+
 		// Bootstrap navigation dropdown event handlers
-
 		$dropdowns.on( {
 
 			"hide.bs.dropdown" : function(e) { 
 				
 				var bcCheck = true;
 
-				console.log( "hide.bs.dropdown" );					
-
-				console.log( "closable: " + $( this ).data( 'closable' ) + " | closing: " +  $( this ).data( 'closing') );
-
-				console.log( getOpenDropdown( $containerElem ) );
-				console.log( getOpenDropdown( $containerElem ).data( 'breadClick' ) );
-				//if( settings.breadcrumb === true && $( 'ul.nav li.open' ).data( 'breadClick' ) !== true) {
+				// If breadcrumbs are used we only animate out if a breadcrumb is clicked.
+				// otherwise animate out on any safe click
 				if( settings.breadcrumb === true && getOpenDropdown( $containerElem ).data( 'breadClick' ) !== true) {
 					bcCheck = false;
 				}
-				//console.log( "Getting Closing: " + jQuery( this ).data( 'closing') );	
 
+				// Skip animations once the closing event happens.
+				// this prevents an overflow loop as the toggle
+				// in animateIn trigers the hide.bs.dropdown event again
 				if( $( this ).data( 'closing') !== true && bcCheck ){
-					console.log( "animateIn Called" );
+					
+					// fire animations sequence.
 					animateIn( this, $containerElem );
 				}
 				
+				// re initalize breadcrumb click state
+				if( settings.breadcrumb === true ) {
+					getOpenDropdown( $containerElem ).data( 'breadClick', false );
+				}
 				
-				getOpenDropdown( $containerElem ).data( 'breadClick', false );
 				// prevent hidding of the dropdown window when closable = false
 				return jQuery( this ).data( 'closable' ); 
 
 				
 			},
 			"hidden.bs.dropdown" : function() { 
-				console.log( "hidden.bs.dropdown" );
+				// console.log( "hidden.bs.dropdown" );
+				// unused remove later
 			},
 			"show.bs.dropdown": function() { 
-				console.log( "show.bs.dropdown" );
+				//console.log( "show.bs.dropdown" );
 
 				animateOut( this, $containerElem );
 				$( this ).data( 'closable', false ); 
 			},
 			"shown.bs.dropdown": function() { 
 
-				console.log( "shown.bs.dropdown" );
+				// console.log( "shown.bs.dropdown" );
 
 				// Initalize closable to false when the dropdown is shown
 				//$( this ).data( 'closable', false ); 
 				// moved to show.bs.dropdown so the whole shown.bs.dropdown
 				// can be removed hopefully.
+				// unused remove later
 		
 			}
 		});
 
 
-        // Greenify the collection based on the settings variable.
+        // return item back for chaining
         return this;
  
     }; // - END animatedNav function()
 
     // publicly available Plugin Defaults
 	$.fn.animatedNav.defaults = {
-		staggerDelay: 200,
-		breadcrumb: true,
-		bchometext: "main"
+		stagger: 200,		// delay between indivual LI element animations	
+		breadcrumb: true,	// flag to use breadcrumbs or not.
+		bchometext: "main"	// Link text of breadcrumb ( not in use yet. )
 	};
 
  
