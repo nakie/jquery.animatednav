@@ -107,12 +107,15 @@
     $.fn.animatedNav = function( options ) {
  
  		// just to avoid confusion with "this" context
- 		var plugin = this;
+ 		var $containerElem = $( this );
 
-        // store defaults overridden by options in 
-        // settings variable which lives in plugin scope.
+       
+        var $toggles = $containerElem.find( "ul.nav li.dropdown .dropdown-toggle" );
+
+		// store defaults overridden by options in 
+		// settings variable which lives in plugin scope.
 		// useable as "settings.color"
-        settings = $.extend({}, $.fn.animatedNav.defaults, options );
+		settings = $.extend({}, $.fn.animatedNav.defaults, options );
  
 		// // array of Dropdown List Items
 		// var navArray = [];
