@@ -136,6 +136,65 @@
 	}; //- END function getOpenDropdown()
 
 
+	var breadcrumbs = function( $containerElem ) {
+		
+		// Create breadcrumb container element.
+		var $breadCrumb  = $( '<ol class="breadcrumb "/>' );
+		//$breadCrumbToggle = $( '<li class="active"><a class="toggle-menu active">' + settings.bchometext + '</a></li' );
+		
+		$breadCrumbToggle = $( '<li class="active">' + settings.bchometext + '</li>' );
+		$breadCrumb.append( $breadCrumbToggle );
+
+		//var $breadCrumb = $containerElem.find( '#breadcrumbContainer'  );
+
+
+       // Get all dropdown toggle elements.
+        var $toggles = $containerElem.find( "ul.nav li.dropdown .dropdown-toggle" );
+
+		//listen to dropdown-toggle anchors to create breadcrumbs.
+		$toggles.click( function(){
+
+			// get text of link to use in breadcrumb
+			var linkText = $( this ).text();
+			
+			$menuToggle = $breadCrumb.find( ".active" );
+
+			$menuToggle.removeClass( "active" );
+			$menuToggle.html( '<a href="#" class="toggle-menu">' + settings.bchometext + '</a>' );
+
+			// Append breadcrumb link
+			$breadCrumb.append( '<li class="active">' + linkText + '</li>' );
+
+		}); // End click ul.nav li.dropdown .dropdown-toggle
+
+				
+		
+		// Breadcrumb click handler.
+		// Show/hide the needed menu based on bredcrumb clicks.
+		$breadCrumb.on( 'click', 'a.toggle-menu', function( e ){
+
+			e.preventDefault(); 
+
+			// remove all breadcrumbs following the item clicked.
+			$ele = $( this ).parent();
+			$ele.nextAll().remove();
+			$ele.addClass( "active" );
+
+			$ele.html( settings.bchometext );
+
+			// signal that a breadcrumb has been clicked 
+			// this allows the animateIn function call to happen.
+			$openDropdown = getOpenDropdown( $containerElem );
+			$openDropdown.data( 'breadClick', true );
+
+
+		}); // - END #breadcrumbContainer on "click" function
+
+		$containerElem.prepend( $breadCrumb );
+
+	}; //- END function breadcrumbs()
+
+
 	/******************************/
 	/***** Private Properties *****/
 	/******************************/
@@ -152,48 +211,12 @@
 
  		// avoid confusion with "this" context
  		var $containerElem = $( this );
-
-       // Get all the dropdown toggle elements.
-        var $toggles = $containerElem.find( "ul.nav li.dropdown .dropdown-toggle" );
-
 		
 		// breadcrumb functionality
 		// ignored if settings.breadcrumb is set to false
 		if( settings.breadcrumb === true ) {
 
-			// get breadcrumb container element.
-			var $breadCrumb = $containerElem.find( '#breadcrumbContainer'  );
-
-			//listen to dropdown-toggle anchors to create breadcrumbs.
-			$toggles.click( function(){
-
-				// get text of link to use in breadcrumb
-				var linkText = $( this ).text();
-				
-				// Append breadcrumb link
-				$breadCrumb.append( "<a>" + linkText + "</a>" );
-
-			}); // End click ul.nav li.dropdown .dropdown-toggle
-
-			
-		
-			// Breadcrumb click handler.
-			// Show/hide the needed menu based on bredcrumb clicks.
-			$breadCrumb.on( 'click', 'a.toggle-menu', function( e ){
-
-				e.preventDefault(); 
-
-				// remove all breadcrumbs following the item clicked.
-				$ele = $( this );
-				$ele.nextAll().remove();
-
-				// signal that a breadcrumb has been clicked 
-				// this allows the animateIn function call to happen.
-				$openDropdown = getOpenDropdown( $containerElem );
-				$openDropdown.data( 'breadClick', true );
-
-
-			}); // - END #breadcrumbContainer on "click" function
+			breadcrumbs( $containerElem );			
 
 		} //- END if( settings.breadcrumbs === true )
 
@@ -266,8 +289,8 @@
     // publicly available Plugin Defaults
 	$.fn.animatedNav.defaults = {
 		stagger: 200,		// delay between indivual LI element animations	
-		breadcrumb: true,	// flag to use breadcrumbs or not.
-		bchometext: "main"	// Link text of breadcrumb ( not in use yet. )
+		breadcrumb: false,	// flag to use menu breadcrumbs.
+		bchometext: "Main Menu"	// Link text of breadcrumb ( not in use yet. )
 	};
 
  
