@@ -121,7 +121,12 @@
 		
 		jQuery( document ).ready( function (){
 
-			jQuery( ".animatedSideMenu" ).animatedNav();
+			//jQuery( ".animatedSideMenu" ).animatedNav();
+
+			jQuery( ".animatedSideMenu" ).animatedNav({ 
+			    "stagger": 120,
+			    "breadcrumb": true
+			  });
 
 		});
 
