@@ -68,21 +68,17 @@
 			}, 100 * i );
 
 		}); //-END $elems.each()
-
-		
 		
 		setTimeout( function(){
-//			jQuery( "ul.navbar-nav>li" ).removeClass( "animated fadeIn" );
+            
+			//jQuery( "ul.navbar-nav>li" ).removeClass( "animated fadeIn" );
 			$main = $( "ul.navbar-nav>li" ).addClass( "animated fadeIn" );
 			//console.log( "Fade In" );
 
 			var $toggleElem = $( 'ul.nav li.open>[data-toggle="dropdown"]' );				
 			
 			$dropdownEle.data( 'closable', true );
-			
-
-			$toggleElem.dropdown( 'toggle' );
-
+			$toggleElem.dropdown( 'toggle' );\
 			$( element ).data( 'closing', false );
 
 		}, $elems.length * 200 );
@@ -98,12 +94,9 @@
 	}; // - END function animateIn()
 
 
-	/******************************/
-	/***** Private Properties *****/
-	/******************************/
-
-	
-
+    /******************************/
+    /***** Public Properties ******/
+    /******************************/	
     $.fn.animatedNav = function( options ) {
  
  		// just to avoid confusion with "this" context
@@ -111,7 +104,7 @@
 
         // store defaults overridden by options in 
         // settings variable which lives in plugin scope.
-		// useable as "settings.color"
+	    // useable as "settings.color"
         settings = $.extend({}, $.fn.animatedNav.defaults, options );
  
 		// // array of Dropdown List Items
@@ -149,18 +142,15 @@
 
 		}); // - END #breadcrumbContainer on "click" function
 
-
 		// Bootstrap navigation dropdown event handlers
-
 		$( 'ul.nav .dropdown' ).on( {
 
 			"hide.bs.dropdown" : function(e) { 
 				
 				var bcCheck = true;
 
-				console.log( "hide.bs.dropdown" );					
-
-				console.log( "closable: " + $( this ).data( 'closable' ) + " | closing: " +  $( this ).data( 'closing') );
+ 				//console.log( "hide.bs.dropdown" );					
+				//console.log( "closable: " + $( this ).data( 'closable' ) + " | closing: " +  $( this ).data( 'closing') );
 
 				if( settings.breadcrumb === true && $( 'ul.nav li.open' ).data( 'breadClick' ) !== true) {
 					bcCheck = false;
@@ -171,32 +161,28 @@
 					console.log( "animateIn Called" );
 					animateIn( this );
 				}
-				
-				
+						
 				$( 'ul.nav li.open' ).data( 'breadClick', false );
 				// prevent hidding of the dropdown window when closable = false
 				return jQuery( this ).data( 'closable' ); 
-
-				
+                
 			},
 			"hidden.bs.dropdown" : function() { 
-				console.log( "hidden.bs.dropdown" );
+				//console.log( "hidden.bs.dropdown" );
 			},
 			"show.bs.dropdown": function() { 
-				console.log( "show.bs.dropdown" );
-
+				
+                //console.log( "show.bs.dropdown" );
 				animateOut( this );
 			},
 			"shown.bs.dropdown": function() { 
 
-				console.log( "shown.bs.dropdown" );
-
+ 				//console.log( "shown.bs.dropdown" );
 				// Initalize closable to false when the dropdown is shown
 				$( this ).data( 'closable', false ); 
 		
 			}
 		});
-
 
         // Greenify the collection based on the settings variable.
         return this;
@@ -204,18 +190,13 @@
     }; // - END animatedNav function()
 
     // publicly available Plugin Defaults
-	$.fn.animatedNav.defaults = {
-		staggerDelay: 200,
-		breadcrumb: true,
-		bchometext: "main"
-	};
-
+    $.fn.animatedNav.defaults = {
+	    staggerDelay: 200,
+	    breadcrumb: true,
+	    bchometext: "main"
+    };
  
 }( jQuery ));
-
-
-
-
 ///  END jQuery Plugin.....
 
 
